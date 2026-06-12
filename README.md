@@ -32,6 +32,10 @@
 git clone https://github.com/Gumballi/Gumball.git
 cd Gumball
 pip3 install -r requirements.txt
+
+python -m venv ./venv
+source ./venv/bin/activate
+
 # Fill your variables in config.py
 python3 -m THANOSPRO
 ```
