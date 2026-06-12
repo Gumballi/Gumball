@@ -29,13 +29,26 @@
 
 #### Local / VPS
 ```bash
+# Clone the repository
 git clone https://github.com/Gumballi/Gumball.git
 cd Gumball
-# If necessary Create virtual env
-python -m venv ./venv
-source ./venv/bin/activate
 
-pip3 install -r requirements.txt
+# Create and activate a virtual environment (Recommended)
+python3 -m venv venv
+source venv/bin/activate  # On Windows use `venv\Scripts\activate`
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Fill your variables in config.py or set as environment variables
+python3 -m THANOSPRO
+```
+
+#### Docker
+```bash
+docker build -t thanospro .
+docker run thanospro
+```
 
 ---
 
