@@ -30,7 +30,7 @@ perf = "Շђคภ๏ร-קг๏"
 
 async def killer():
     rishu_USER = bot.me.first_name
-    rishu_mention = f"[{rishu_USER}](tg://user?id={thanosceo})"
+    rishu_mention = f"[{rishu_USER}](tg://user?id={bot.uid})"
     name = f"{rishu_mention}'s Assistant"
     description = (
         f"I am Assistant Of {rishu_mention}.This Bot Can Help U To Chat With My Master"
@@ -70,7 +70,7 @@ async def killer():
             await asyncio.sleep(1)
             await bot.send_message("@BotFather", botname)
             await asyncio.sleep(1)
-            await bot.send_file("@BotFather", "userbot/resources/pics/main.jpg")
+            await bot.send_file("@BotFather", "THANOSPRO/resources/pics/main.jpg")
             await asyncio.sleep(2)
         except Exception as e:
             print(e)
@@ -180,7 +180,7 @@ async def help(event):
             buttons=[
                 [
                     custom.Button.inline(" Set var ", data="setvar"),
-                    custom.Button.inline(" Get Var ", data="gevar"),
+                    custom.Button.inline(" Get Var ", data="getvar"),
                 ],
                 [custom.Button.inline(" Del Var ", data="delvar")],
             ],

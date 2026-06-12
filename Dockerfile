@@ -1,4 +1,4 @@
-FROM nikolaik/python-nodejs:python3.9-nodejs18
+FROM python:3.10-slim
 RUN apt-get update -y && apt-get upgrade -y \
     && apt-get install -y --no-install-recommends ffmpeg \
     && apt-get clean \
@@ -6,5 +6,5 @@ RUN apt-get update -y && apt-get upgrade -y \
 COPY . /app/
 WORKDIR /app/
 RUN pip3 install --upgrade pip
-RUN pip3 install --no-cache-dir --upgrade --requirement Installer
+RUN pip3 install --no-cache-dir -r requirements.txt
 CMD python3 -m THANOSPRO

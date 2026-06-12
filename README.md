@@ -1,81 +1,78 @@
-<h1 align="center">
-<b> Շђคภ๏ร-קг๏ </b>
-</h1>
+# Շђคภ๏ร-קг๏ (Thanos-Pro)
 
-![THANOSPRO](https://user-images.githubusercontent.com/94896142/156706265-82c519db-5944-4db5-b51c-b3ab9e1c80b7.jpg)
+[![GitHub Stars](https://img.shields.io/github/stars/Gumballi/Gumball?style=social)](https://github.com/Gumballi/Gumball)
+[![GitHub Forks](https://img.shields.io/github/forks/Gumballi/Gumball?style=social)](https://github.com/Gumballi/Gumball)
+[![License](https://img.shields.io/github/license/Gumballi/Gumball)](LICENSE)
 
-<h6 align="center">
-  <b>💞 ·Շђคภ๏ร-קг๏ Is One Of The Unique & Fastest & Smoothest Bot On Telegram Based on Telethon💞</b>
-</h6>
-<details>
-<summary><h3>Telegram</h3></summary>
+**Thanos-Pro** is a high-performance, feature-rich Telegram Userbot based on the [Telethon](https://github.com/LonamiWebs/Telethon) library. It allows you to automate your personal Telegram account with a modular plugin system, providing tools for group management, media processing, and account security.
 
+---
 
-## 🔥Telegram🔥
-- [![Telegram Group](https://img.shields.io/badge/Telegram-Group-red)](https://t.me/thanosprosss)
-- [![Telegram Channel](https://img.shields.io/badge/Telegram-Channel-red)](https://t.me/thanos_pro)
-</details>
-<details>
-<summary><h3>WORKFLOW</h3></summary>
+## 🚀 Features
 
-[Import](https://github.com/new/import) 
+- **Multi-Client Support:** Run up to 5 Telegram sessions simultaneously.
+- **Group Management:** Automated tools for moderation (ban, mute, promote, anti-flood).
+- **Security:** Built-in PM Permit system to protect your private messages.
+- **Media Tools:** Downloaders for YouTube, Instagram, and more; image editing and file conversion.
+- **Extensible:** Easily add new features via the modular plugin system.
 
-- CLICK ON IMPORT AND IMPORT THIS REPOSITORY
-- AND FILL CONFIG.PY 
-- AND NOW DEPLOYE IN YOUR THANOS KALI LINUX SERVER
-- KALI LINUX SERVER [REPO](https://github.com/Gandi098/thanos-kali)
-</details>
-<details>
-<summary><h3>HEROKU</h3></summary>
+---
 
-# HEROKU 
- - IF U WANT TO DEPLOYE Շђคภ๏ร-קг๏ IN HEROKU THEN CLICK ON MAIN REPO
+## 🛠 Installation
 
-- [main repo](https://github.com/thanosuser/THANOS-PROS)
-</details>
-<details>
-<summary><h3>DISCLAIMER</h3></summary>
+### 1. Prerequisites
+- Python 3.9 or higher
+- A Telegram `APP_ID` and `API_HASH` from [my.telegram.org](https://my.telegram.org)
+- A `DATABASE_URL` (PostgreSQL recommended)
 
-## DISCLAIMER 
-- We won't be responsible for any kind of ban due to this bot.
-- THANOSPRO was made for fun purpose and to make group management easier.
-- It's your concern if you spam and gets your account banned.
-- Also, Forks won't be entertained.
-- If you fork this repo and edit plugins, it's your concern for further updates.
-- Forking Repo is fine. But if you edit something we will not provide any help.
-- In short, Fork At Your Own Risk.
-</details>
-## Status Of Bot 
-<p align="left">
-    <a href="https://github.com/thanosuser/THANOS-PROS/network/members"><img src="https://img.shields.io/github/forks/thanosuser/thanos-pros?label=Forks&logoColor=red&style=social"></a><p align="left"><a href="https://github.com/thanosuser/THANOS-PROS/stargazers"><img src="https://img.shields.io/github/stars/thanosuser/THANOS-PROS?logoColor=Blue&style=social"></a><p align="left"><a href="https://github.com/thanosuser/THANOS-PROS"></a><p align="left"><a href="https://github.com/thanosuser/THANOS-PROS?"></a>
+### 2. Deployment
 
-<details>
-<summary><h3>Credits</h3></summary>
+#### Local / VPS
+```bash
+git clone https://github.com/Gumballi/Gumball.git
+cd Gumball
+pip3 install -r requirements.txt
+# Fill your variables in config.py
+python3 -m THANOSPRO
+```
 
-## Credits
+#### Docker
+```bash
+docker build -t thanospro .
+docker run thanospro
+```
 
+---
 
-- ⚡RISHABH⚡ - ⚡PRIYA⚡ - ⚡LEGEND X⚡
+## ⚙️ Configuration
 
-</details>
-<details>
-<summary><h3>OWNER</h3></summary>
+Create a `config.py` file or set the following environment variables:
 
-## OWNER 
-- ⚡RISHABH ⚡
-- ⚡PRIYA⚡
+| Variable | Description |
+| :--- | :--- |
+| `APP_ID` | Your Telegram API ID |
+| `API_HASH` | Your Telegram API Hash |
+| `BOT_TOKEN` | Bot token from [@BotFather](https://t.me/BotFather) |
+| `THANOSPRO_SESSION` | Telethon String Session |
+| `DATABASE_URL` | PostgreSQL Database URI |
 
-</details>
-<details>
-<summary><h3>assistant</h3></summary>
-## assistant 
-- proboy
-</details>
-<details>
-<summary><h3>plugins credits</h3></summary>
-## plugins credits
-- catbot
-- thanospros-v1
-- hellbot
-- legend bot
-</details>
+---
+
+## 🤝 Contributing
+
+Contributions are welcome! Please fork the repository and submit a pull request for any improvements or bug fixes.
+
+---
+
+## ⚖️ Disclaimer
+
+- This project is for educational and fun purposes only.
+- The developers are not responsible for any account bans or misuse of this bot.
+- **Self-botting is against Telegram's Terms of Service.** Use at your own risk.
+
+---
+
+## 📜 Credits
+
+Developed with ❤️ by [Gumballi](https://github.com/Gumballi).
+Special thanks to the Telethon community and contributors.
