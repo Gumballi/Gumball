@@ -10,7 +10,14 @@ from THANOSPRO.config import Config
 
 
 def start() -> scoped_session:
-    engine = create_engine(Config.DB_URI)
+    db_uri = Config.DB_URI
+    if db_uri and db_uri.startswith("postgres://"):
+        db_uri = db_uri.replace("postgres://", "postgresql://", 1)
+    
+    if not db_uri or db_uri == "Your value":
+        raise AttributeError("DB_URI is not configured.")
+
+    engine = create_engine(db_uri)
     BASE.metadata.bind = engine
     BASE.metadata.create_all(engine)
     return scoped_session(sessionmaker(bind=engine, autoflush=False))

@@ -5,7 +5,8 @@ from pathlib import Path
 from telethon import events
 
 from .session import H2, H3, H4, H5
-from THANOSPRO import CMD_LIST, LOAD_PLUG, bot
+from THANOSPRO.state import CMD_LIST, LOAD_PLUG
+from THANOSPRO import bot
 from THANOSPRO.config import Config
 from THANOSPRO.sql.gvar_sql import gvarstat
 

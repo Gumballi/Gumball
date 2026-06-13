@@ -3,7 +3,16 @@ import os
 import sys
 import time
 
-from distutils.util import strtobool as sb
+def strtobool(val):
+    val = val.lower()
+    if val in ('y', 'yes', 't', 'true', 'on', '1'):
+        return 1
+    elif val in ('n', 'no', 'f', 'false', 'off', '0'):
+        return 0
+    else:
+        raise ValueError("invalid boolean value %r" % (val,))
+
+sb = strtobool
 from logging import DEBUG, INFO, basicConfig, getLogger
 
 from THANOSPRO.clients.session import H2, H3, H4, H5, rishu, THANOSPRO
@@ -50,9 +59,9 @@ if not Config.BOT_TOKEN:
 #     quit(1)
     
 
-if not Config.DB_URI:    
+if not Config.DB_URI or Config.DB_URI == "Your value":    
     LOGS.warning("Please fill var DATABASE_URL to continue.")
-    quit(1)
+    # quit(1) # Don't quit, let the database features fail gracefully or use local DB if implemented
 
 
 if not Config.THANOSPRO_SESSION:
@@ -71,20 +80,8 @@ except Exception:
     HEROKU_APP = None
 
 
-# global variables
-CMD_LIST = {}
-CMD_HELP = {}
-CMD_HELP_BOT = {}
-CMD_INFO = {}
-INT_PLUG = ""
-LOAD_PLUG = {}
-COUNT_MSG = 0
-USERS = {}
-COUNT_PM = {}
-LASTMSG = {}
-ISAFK = False
-AFKREASON = None
-SUDO_LIST = {}
+# global variables (moved to state.py to prevent circular imports)
+from .state import *
 
 
 # THANOSPRO

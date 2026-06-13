@@ -116,7 +116,7 @@ async def start_THANOSPRO():
         C3 = await rishus(Config.SESSION_3, H3, "SESSION_3")
         C4 = await rishus(Config.SESSION_4, H4, "SESSION_4")
         C5 = await rishus(Config.SESSION_5, H5, "SESSION_5")
-        await tbot.start()
+        await tbot.start(bot_token=Config.BOT_TOKEN)
         total = C1 + C2 + C3 + C4 + C5
         LOGS.info("⚡️Շђคภ๏รקг๏ Startup Completed ⚡️")
         LOGS.info("⚡️  installing Շђคภ๏รקг๏ Plugins ⚡️")
@@ -136,7 +136,9 @@ async def start_THANOSPRO():
         sys.exit()
 
 
-bot.loop.run_until_complete(start_THANOSPRO())
+if __name__ == "__main__":
+    loop = asyncio.get_event_loop()
+    loop.run_until_complete(start_THANOSPRO())
 
 if len(sys.argv) not in (1, 3, 4):
     bot.disconnect()

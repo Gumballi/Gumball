@@ -41,7 +41,7 @@ async def convert_to_image(event, client):
             downloaded_file_name = await event.client.download_media(
                 rishu.media,
                 dwlpath,
-                progress_callback=lambda d, t: asyncio.get_event_loop().create_task(
+                progress_callback=lambda d, t: asyncio.get_running_loop().create_task(
                     progress(d, t, event, c_time, "`Downloading...`")
                 ),
             )

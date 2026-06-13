@@ -7,13 +7,12 @@ from telethon.sessions import StringSession
 from THANOSPRO.config import Config
 
 
-if Config.THANOSPRO_SESSION:
-    session = StringSession(str(Config.THANOSPRO_SESSION))
-else:
-    session = "THANOSPRO"
-
-try:
-    rishu = TelegramClient(
+def create_client(session_str, name):
+    if session_str:
+        session = StringSession(str(session_str))
+    else:
+        session = name
+    return TelegramClient(
         session=session,
         api_id=Config.APP_ID,
         api_hash=Config.API_HASH,
@@ -21,66 +20,12 @@ try:
         auto_reconnect=True,
         connection_retries=None,
     )
-except Exception as e:
-    print(f"THANOSPRO_SESSION - {e}")
-    sys.exit()
 
-
-if Config.SESSION_2:
-    session2 = StringSession(str(Config.SESSION_2))
-    H2 = TelegramClient(
-        session=session2,
-        api_id=Config.APP_ID,
-        api_hash=Config.API_HASH,
-        connection=ConnectionTcpAbridged,
-        auto_reconnect=True,
-        connection_retries=None,
-    )
-else:
-    H2 = None
-
-
-if Config.SESSION_3:
-    session3 = StringSession(str(Config.SESSION_3))
-    H3 = TelegramClient(
-        session=session3,
-        api_id=Config.APP_ID,
-        api_hash=Config.API_HASH,
-        connection=ConnectionTcpAbridged,
-        auto_reconnect=True,
-        connection_retries=None,
-    )
-else:
-    H3 = None
-
-
-if Config.SESSION_4:
-    session4 = StringSession(str(Config.SESSION_4))
-    H4 = TelegramClient(
-        session=session4,
-        api_id=Config.APP_ID,
-        api_hash=Config.API_HASH,
-        connection=ConnectionTcpAbridged,
-        auto_reconnect=True,
-        connection_retries=None,
-    )
-else:
-    H4 = None
-
-
-if Config.SESSION_5:
-    session5 = StringSession(str(Config.SESSION_5))
-    H5 = TelegramClient(
-        session=session5,
-        api_id=Config.APP_ID,
-        api_hash=Config.API_HASH,
-        connection=ConnectionTcpAbridged,
-        auto_reconnect=True,
-        connection_retries=None,
-    )
-else:
-    H5 = None
-
+rishu = create_client(Config.THANOSPRO_SESSION, "THANOSPRO")
+H2 = create_client(Config.SESSION_2, "H2") if Config.SESSION_2 else None
+H3 = create_client(Config.SESSION_3, "H3") if Config.SESSION_3 else None
+H4 = create_client(Config.SESSION_4, "H4") if Config.SESSION_4 else None
+H5 = create_client(Config.SESSION_5, "H5") if Config.SESSION_5 else None
 
 THANOSPRO = TelegramClient(
     session="rishu-TBot",
@@ -89,4 +34,4 @@ THANOSPRO = TelegramClient(
     connection=ConnectionTcpAbridged,
     auto_reconnect=True,
     connection_retries=None,
-).start(bot_token=Config.BOT_TOKEN)
+)
