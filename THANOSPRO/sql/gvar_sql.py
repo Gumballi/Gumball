@@ -1,6 +1,6 @@
-from sqlalchemy import Column, String, UnicodeText
-from . import BASE, SESSION
-
+from sqlalchemy import Column, String, UnicodeText, select, delete
+from . import BASE
+import THANOSPRO.sql as sql
 
 class Gvar(BASE):
     __tablename__ = "gvar"
@@ -11,37 +11,38 @@ class Gvar(BASE):
         self.variable = str(variable)
         self.value = value
 
-
-Gvar.__table__.create(checkfirst=True)
-
+# Table creation is handled in init_db()
 
 def gvarstat(variable):
+    if sql.SESSION is None: return None
     try:
-        return (
-            SESSION.query(Gvar)
-            .filter(Gvar.variable == str(variable))
-            .first()
-            .value
-        )
-    except BaseException:
+        stmt = select(Gvar).where(Gvar.variable == str(variable))
+        res = sql.SESSION.execute(stmt).scalars().first()
+        return res.value if res else None
+    except Exception:
         return None
     finally:
-        SESSION.close()
-
+        sql.SESSION.remove()
 
 def addgvar(variable, value):
-    if SESSION.query(Gvar).filter(Gvar.variable == str(variable)).one_or_none():
+    if sql.SESSION is None: return
+    try:
         delgvar(variable)
-    adder = Gvar(str(variable), value)
-    SESSION.add(adder)
-    SESSION.commit()
-
+        adder = Gvar(str(variable), value)
+        sql.SESSION.add(adder)
+        sql.SESSION.commit()
+    except Exception:
+        sql.SESSION.rollback()
+    finally:
+        sql.SESSION.remove()
 
 def delgvar(variable):
-    rem = (
-        SESSION.query(Gvar)
-        .filter(Gvar.variable == str(variable))
-        .delete(synchronize_session="fetch")
-    )
-    if rem:
-        SESSION.commit()
+    if sql.SESSION is None: return
+    try:
+        stmt = delete(Gvar).where(Gvar.variable == str(variable))
+        sql.SESSION.execute(stmt)
+        sql.SESSION.commit()
+    except Exception:
+        sql.SESSION.rollback()
+    finally:
+        sql.SESSION.remove()

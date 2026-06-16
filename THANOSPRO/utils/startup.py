@@ -20,16 +20,20 @@ async def logger_id(client):
         pin_messages=True,
         manage_call=True,
     )
+    grp_id = None
     try:
         grp = await client(functions.channels.CreateChannelRequest(title="Շђคภ๏ร-קг๏ ɭ๏ﻮﻮєг", about=desc, megagroup=True))
         grp_id = grp.chats[0].id
-        grp = await client(functions.messages.ExportChatInviteRequest(peer=grp_id))
-        await client(functions.channels.InviteToChannelRequest(channel=grp_id, users=[Config.BOT_USERNAME]))
-        await client(functions.channels.EditAdminRequest(grp_id, Config.BOT_USERNAME, new_rights, "Helper"))
+        await client(functions.messages.ExportChatInviteRequest(peer=grp_id))
+        if Config.BOT_USERNAME:
+            await client(functions.channels.InviteToChannelRequest(channel=grp_id, users=[Config.BOT_USERNAME]))
+            await client(functions.channels.EditAdminRequest(grp_id, Config.BOT_USERNAME, new_rights, "Helper"))
     except Exception as e:
-        LOGS.error(f"{str(e)}")
-    if not str(grp_id).startswith("-100"):
-        grp_id = int("-100" + str(grp_id))
+        LOGS.error(f"Error creating logger group: {e}")
+    
+    if grp_id:
+        if not str(grp_id).startswith("-100"):
+            grp_id = int("-100" + str(grp_id))
     return grp_id
 
 

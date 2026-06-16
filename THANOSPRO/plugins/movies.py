@@ -4,6 +4,7 @@ from bs4 import BeautifulSoup
 from pySmartDL import SmartDL
 
 from . import *
+from THANOSPRO.helpers.movies import imdb, mov_titles, get_casts, get_movies, moviepath
 
 logo = "https://telegra.ph/file/2c546060b20dfd7c1ff2d.jpg"
 
@@ -13,10 +14,14 @@ async def _(event):
     hel_ = await eor(event, "`Processing ...`")
     try:
         rishu = event.pattern_match.group(1)
+        if not rishu:
+            return await hel_.edit("Please provide a movie name.")
         await hel_.edit("__Searching for__ `{}`".format(rishu))
         # Credits to catuserbot.
         # Ported to THANOSPRO and beautifications by @ultronceo.
         movies = imdb.search_movie(rishu)
+        if not movies:
+            return await hel_.edit(f"No results found for `{rishu}`")
         movieid = movies[0].movieID
         movie = imdb.get_movie(movieid)
         moviekeys = list(movie.keys())

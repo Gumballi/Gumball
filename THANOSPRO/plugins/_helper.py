@@ -41,7 +41,7 @@ async def _(event):
             await event.delete()
         except noinline:
             rishu = await eor(event, "**Inline Mode is disabled.** \n__Turning it on, please wait for a minute...__")
-            async with bot.conversation(chat) as conv:
+            async with event.client.conversation(chat) as conv:
                 try:
                     first = await conv.send_message("/setinline")
                     second = await conv.get_response()
@@ -49,11 +49,11 @@ async def _(event):
                     fourth = await conv.get_response()
                     fifth = await conv.send_message(perf)
                     sixth = await conv.get_response()
-                    await bot.send_read_acknowledge(conv.chat_id)
+                    await event.client.send_read_acknowledge(conv.chat_id)
                 except YouBlockedUserError:
                     return await rishu.edit("Unblock @Botfather first.")
                 await rishu.edit(f"**Turned On Inline Mode Successfully.** \n\nDo `{hl}help` again to get the help menu.")
-            await bot.delete_messages(
+            await event.client.delete_messages(
                 conv.chat_id, [first.id, second.id, third.id, fourth.id, fifth.id, sixth.id]
             )
     else:

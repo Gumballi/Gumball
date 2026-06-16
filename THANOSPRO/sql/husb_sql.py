@@ -1,6 +1,6 @@
-from sqlalchemy import Boolean, Column, Integer, String, UnicodeText
-from . import BASE, SESSION
-
+from sqlalchemy import Column, String, select, delete
+from . import BASE
+import THANOSPRO.sql as sql
 
 class Husbando(BASE):
     __tablename__ = "husbando"
@@ -9,33 +9,50 @@ class Husbando(BASE):
     def __init__(self, chat_id):
         self.chat_id = chat_id
 
-
-Husbando.__table__.create(checkfirst=True)
-
+# Table creation is handled in init_db()
 
 def add_hus_grp(chat_id: str):
-    husba = Husbando(str(chat_id))
-    SESSION.add(husba)
-    SESSION.commit()
-
+    if sql.SESSION is None: return
+    try:
+        if not is_husb(chat_id):
+            husba = Husbando(str(chat_id))
+            sql.SESSION.add(husba)
+            sql.SESSION.commit()
+    except Exception:
+        sql.SESSION.rollback()
+    finally:
+        sql.SESSION.remove()
 
 def rm_hus_grp(chat_id: str):
-    husba = SESSION.query(Husbando).get(str(chat_id))
-    if husba:
-        SESSION.delete(husba)
-        SESSION.commit()
-
+    if sql.SESSION is None: return
+    try:
+        stmt = delete(Husbando).where(Husbando.chat_id == str(chat_id))
+        sql.SESSION.execute(stmt)
+        sql.SESSION.commit()
+    except Exception:
+        sql.SESSION.rollback()
+    finally:
+        sql.SESSION.remove()
 
 def get_all_hus_grp():
-    husba = SESSION.query(Husbando).all()
-    SESSION.close()
-    return husba
-
+    if sql.SESSION is None: return []
+    try:
+        stmt = select(Husbando)
+        return sql.SESSION.execute(stmt).scalars().all()
+    except Exception:
+        return []
+    finally:
+        sql.SESSION.remove()
 
 def is_husb(chat_id: str):
+    if sql.SESSION is None: return None
     try:
-        husba = SESSION.query(Husbando).get(str(chat_id))
+        stmt = select(Husbando).where(Husbando.chat_id == str(chat_id))
+        husba = sql.SESSION.execute(stmt).scalars().first()
         if husba:
             return str(husba.chat_id)
+        return None
+    except Exception:
+        return None
     finally:
-        SESSION.close()
+        sql.SESSION.remove()

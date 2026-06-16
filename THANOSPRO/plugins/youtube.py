@@ -5,8 +5,8 @@ import re
 import time
 
 from telethon.tl.types import DocumentAttributeAudio
-from youtube_dl import YoutubeDL
-from youtube_dl.utils import ContentTooShortError, DownloadError, ExtractorError, GeoRestrictedError, MaxDownloadsReached, PostProcessingError, UnavailableVideoError, XAttrMetadataError
+from yt_dlp import YoutubeDL
+from yt_dlp.utils import ContentTooShortError, DownloadError, ExtractorError, GeoRestrictedError, MaxDownloadsReached, PostProcessingError, UnavailableVideoError, XAttrMetadataError
 
 from . import *
 
@@ -75,7 +75,7 @@ async def download_video(event):
                     performer=perf,
                 )
             ],
-            progress_callback=lambda d, t: asyncio.get_event_loop().create_task(
+            progress_callback=lambda d, t: asyncio.get_running_loop().create_task(
                 progress(
                     d, t, event, c_time, "Uploading..", f"{ytdl_data['title']}.mp3"
                 )
@@ -94,7 +94,7 @@ async def download_video(event):
             f"{ytdl_data['id']}.mp4",
             supports_streaming=True,
             caption=ytdl_data["title"],
-            progress_callback=lambda d, t: asyncio.get_event_loop().create_task(
+            progress_callback=lambda d, t: asyncio.get_running_loop().create_task(
                 progress(
                     d, t, event, c_time, "Uploading..", f"{ytdl_data['title']}.mp4"
                 )

@@ -3,7 +3,7 @@ import os
 import requests
 import urllib.parse
 
-from THANOSPRO.utils.extras import delete_rishu as eod
+# Import inside functions to avoid circular issues
 
 
 class rishu_YTS:
@@ -73,6 +73,7 @@ async def song_search(event, query, max_results, details=False):
     try:
         results = json.loads(rishu_YTS(query, max_results=max_results).to_json())
     except KeyError:
+        from THANOSPRO.utils.extras import delete_rishu as eod
         return await eod(event, "Unable to find relevant search query.")
     x = ""
     for i in results["videos"]:

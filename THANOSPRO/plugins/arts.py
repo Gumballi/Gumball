@@ -1,4 +1,5 @@
 from . import *
+from THANOSPRO.state import LOGS
 
 @rishu_cmd(pattern="carry ([\s\S]*)")
 async def kraken(carry):

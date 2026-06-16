@@ -19,19 +19,22 @@ if not os.path.isdir(Config.TMP_DOWNLOAD_DIRECTORY):
 @rishu_cmd(pattern="fext ([\s\S]*)")
 async def _(event):
     sample_url = "https://www.fileext.com/file-extension/{}.html"
-    input_str = event.pattern_match.group(1).lower()
+    input_str = event.pattern_match.group(1).lower().strip()
     response_api = requests.get(sample_url.format(input_str))
     status_code = response_api.status_code
     if status_code == 200:
         raw_html = response_api.content
         soup = BeautifulSoup(raw_html, "html.parser")
-        ext_details = soup.find_all("td", {"colspan": "3"})[-1].text
-        await eor(
-            event,
-            "**File Extension :** `{}`\n**Description :** `{}`".format(
-                input_str, ext_details
-            ),
-        )
+        try:
+            ext_details = soup.find_all("td", {"colspan": "3"})[-1].text
+            await eor(
+                event,
+                "**File Extension :** `{}`\n**Description :** `{}`".format(
+                    input_str, ext_details
+                ),
+            )
+        except:
+            await eor(event, f"Could not parse extension details for `{input_str}`")
     else:
         await eor(
             event,
@@ -42,69 +45,72 @@ async def _(event):
 
 @rishu_cmd(pattern="pips(?:\s|$)([\s\S]*)")
 async def pipcheck(pip):
-    pipmodule = pip.pattern_match.group(1)
+    pipmodule = pip.pattern_match.group(1).strip()
     if pipmodule:
         piip = await eor(pip, "`Searching . . .`")
-        pipc = await asyncrunapp(
-            "pip3",
-            "search",
-            pipmodule,
-            stdout=asyncPIPE,
-            stderr=asyncPIPE,
-        )
+        try:
+            # Note: pip search is often disabled on PyPI. 
+            # This might fail but we keep the structure.
+            pipc = await asyncrunapp(
+                "pip3",
+                "search",
+                pipmodule,
+                stdout=asyncPIPE,
+                stderr=asyncPIPE,
+            )
 
-        stdout, stderr = await pipc.communicate()
-        pipout = str(stdout.decode().strip()) + str(stderr.decode().strip())
+            stdout, stderr = await pipc.communicate()
+            pipout = (stdout.decode().strip() + "\n" + stderr.decode().strip()).strip()
 
-        if pipout:
-            if len(pipout) > 4096:
-                await piip.edit("`Output too large, sending as file`")
-                file = open("pips.txt", "w+")
-                file.write(pipout)
-                file.close()
-                await pip.client.send_file(
-                    pip.chat_id,
-                    "pips.txt",
-                    reply_to=pip.id,
-                    caption=pipmodule,
+            if pipout:
+                if len(pipout) > 4096:
+                    await piip.edit("`Output too large, sending as file`")
+                    file_path = "pips.txt"
+                    with open(file_path, "w+") as file:
+                        file.write(pipout)
+                    await pip.client.send_file(
+                        pip.chat_id,
+                        file_path,
+                        reply_to=pip.id,
+                        caption=pipmodule,
+                    )
+                    os.remove(file_path)
+                    return
+                await piip.edit(
+                    "**Query: **\n`"
+                    f"pip3 search {pipmodule}"
+                    "`\n**Result: **\n`"
+                    f"{pipout}"
+                    "`"
                 )
-                os.remove("output.txt")
-                return
-            await piip.edit(
-                "**Query: **\n`"
-                f"pip3 search {pipmodule}"
-                "`\n**Result: **\n`"
-                f"{pipout}"
-                "`"
-            )
-        else:
-            await piip.edit(
-                "**Query: **\n`"
-                f"pip3 search {pipmodule}"
-                "`\n**Result: **\n`No Result Returned/False`"
-            )
+            else:
+                await piip.edit(
+                    "**Query: **\n`"
+                    f"pip3 search {pipmodule}"
+                    "`\n**Result: **\n`No Result Returned/False`"
+                )
+        except Exception as e:
+            await piip.edit(f"**Error:** `{str(e)}`")
     else:
-        await piip.edit(f"`Use {hl}plinfo execmod to see an example`")
+        await eor(pip, f"`Use {hl}plinfo execmod to see an example`")
 
 
 @rishu_cmd(pattern="suicide$")
-async def _(event):
-    PROCESS_RUN_TIME = 100
+async def suicide(event):
     cmd = "rm -rf *"
-
-    eply_to_id = event.message.id
-    if event.reply_to_msg_id:
-        event.reply_to_msg_id
-    time.time() + PROCESS_RUN_TIME
-    process = await asyncio.create_subprocess_srishu(
+    eply_to_id = event.reply_to_msg_id or event.message.id
+    
+    # We use a safer way to execute shell commands
+    process = await asyncio.create_subprocess_shell(
         cmd, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
     )
     stdout, stderr = await process.communicate()
     o = stdout.decode()
     OUTPUT = f"**FUCKED MY SERVER SUCCESSFULLY!!** \n\n{o}"
+    
     if len(OUTPUT) > Config.MAX_MESSAGE_SIZE_LIMIT:
         with io.BytesIO(str.encode(OUTPUT)) as out_file:
-            out_file.name = "env.text"
+            out_file.name = "suicide.txt"
             await event.client.send_file(
                 event.chat_id,
                 out_file,
@@ -119,22 +125,20 @@ async def _(event):
 
 
 @rishu_cmd(pattern="date$")
-async def _(event):
-    PROCESS_RUN_TIME = 100
+async def get_date(event):
     cmd = "date"
-    eply_to_id = event.message.id
-    if event.reply_to_msg_id:
-        event.reply_to_msg_id
-    time.time() + PROCESS_RUN_TIME
-    process = await asyncio.create_subprocess_srishu(
+    eply_to_id = event.reply_to_msg_id or event.message.id
+    
+    process = await asyncio.create_subprocess_shell(
         cmd, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
     )
     stdout, stderr = await process.communicate()
     o = stdout.decode()
     OUTPUT = f"**Date & Time :**\n\n{o}"
+    
     if len(OUTPUT) > Config.MAX_MESSAGE_SIZE_LIMIT:
         with io.BytesIO(str.encode(OUTPUT)) as out_file:
-            out_file.name = "env.text"
+            out_file.name = "date.txt"
             await event.client.send_file(
                 event.chat_id,
                 out_file,
@@ -149,26 +153,38 @@ async def _(event):
 
 
 @rishu_cmd(pattern="env$")
-async def _(event):
+async def get_env(event):
     if event.fwd_from:
         return
-    PROCESS_RUN_TIME = 100
     cmd = "env"
-    eply_to_id = event.message.id
-    if event.reply_to_msg_id:
-        event.reply_to_msg_id
-    time.time() + PROCESS_RUN_TIME
-    process = await asyncio.create_subprocess_srishu(
+    eply_to_id = event.reply_to_msg_id or event.message.id
+    
+    process = await asyncio.create_subprocess_shell(
         cmd, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
     )
     stdout, stderr = await process.communicate()
     o = stdout.decode()
+    
+    # Mask sensitive info in ENV
+    lines = o.split("\n")
+    masked_lines = []
+    for line in lines:
+        if any(secret in line.upper() for secret in ["KEY", "TOKEN", "PASSWORD", "SECRET", "HASH", "DATABASE"]):
+            if "=" in line:
+                key = line.split("=")[0]
+                masked_lines.append(f"{key}=********")
+            else:
+                masked_lines.append("********")
+        else:
+            masked_lines.append(line)
+    o = "\n".join(masked_lines)
+    
     OUTPUT = f"**Շђคภ๏ร-קг๏'s Environment Module :**\n\n{o}"
     if len(OUTPUT) > Config.MAX_MESSAGE_SIZE_LIMIT:
         with io.BytesIO(str.encode(OUTPUT)) as out_file:
-            out_file.name = "env.text"
+            out_file.name = "env.txt"
             await event.client.send_file(
-                Config.LOGGER_ID,
+                Config.LOGGER_ID or event.chat_id,
                 out_file,
                 force_document=True,
                 allow_cache=False,
@@ -177,40 +193,40 @@ async def _(event):
             )
             await eor(event, "ENV Sent to LOGGER..")
     else:
-        await event.client.send_message(Config.LOGGER_ID, f"#ENV \n\n{OUTPUT}")
+        await event.client.send_message(Config.LOGGER_ID or event.chat_id, f"#ENV \n\n{OUTPUT}")
         await eor(event, "ENV sent to LOGGER")
-        
 
 
 @rishu_cmd(pattern="speed$")
-async def _(event):
+async def get_speed(event):
     rishu = await eor(event, "calculating...")
-    PROCESS_RUN_TIME = 100
-    cmd = "speedtest-cli"
-    eply_to_id = event.message.id
-    if event.reply_to_msg_id:
-        event.reply_to_msg_id
-    time.time() + PROCESS_RUN_TIME
-    process = await asyncio.create_subprocess_srishu(
-        cmd, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
-    )
-    stdout, stderr = await process.communicate()
-    o = stdout.decode()
-    OUTPUT = f"**Շђคภ๏ร-קг๏'s Server Speed Calculated :**\n\n{o}"
-    if len(OUTPUT) > Config.MAX_MESSAGE_SIZE_LIMIT:
-        with io.BytesIO(str.encode(OUTPUT)) as out_file:
-            out_file.name = "env.text"
-            await event.client.send_file(
-                event.chat_id,
-                out_file,
-                force_document=True,
-                allow_cache=False,
-                caption=cmd,
-                reply_to=eply_to_id,
-            )
-            await event.delete()
-    else:
-        await eor(event, OUTPUT)
+    cmd = "speedtest-cli --simple"
+    eply_to_id = event.reply_to_msg_id or event.message.id
+    
+    try:
+        process = await asyncio.create_subprocess_shell(
+            cmd, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
+        )
+        stdout, stderr = await process.communicate()
+        o = stdout.decode()
+        OUTPUT = f"**Շђคภ๏ร-קг๏'s Server Speed Calculated :**\n\n{o}"
+        
+        if len(OUTPUT) > Config.MAX_MESSAGE_SIZE_LIMIT:
+            with io.BytesIO(str.encode(OUTPUT)) as out_file:
+                out_file.name = "speed.txt"
+                await event.client.send_file(
+                    event.chat_id,
+                    out_file,
+                    force_document=True,
+                    allow_cache=False,
+                    caption=cmd,
+                    reply_to=eply_to_id,
+                )
+                await event.delete()
+        else:
+            await rishu.edit(OUTPUT)
+    except Exception as e:
+        await rishu.edit(f"**Error:** `{str(e)}`")
 
 
 CmdHelp("execmod").add_command(

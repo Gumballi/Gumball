@@ -5,8 +5,9 @@ import time
 from telethon.errors import ChatSendInlineForbiddenError as noin
 from telethon.errors.rpcerrorlist import BotMethodInvalidError as dedbot
 
-from THANOSPRO.sql.gvar_sql import gvarstat
 from . import *
+from THANOSPRO.sql.gvar_sql import gvarstat
+from THANOSPRO.state import StartTime
 
 #-------------------------------------------------------------------------------
 
@@ -81,52 +82,52 @@ async def amireallyalive(yes):
     edit_time = 12
     reply_to_id = await reply_id(yes)
     await yes.get_chat()
-    on = await borg.send_file(
+    on = await yes.client.send_file(
         yes.chat_id, file=file1, caption=pm_caption, reply_to=reply_to_id
     )
     await asyncio.sleep(edit_time)
-    ok = await borg.edit_message(yes.chat_id, on, file=file2)
+    ok = await yes.client.edit_message(yes.chat_id, on, file=file2)
 
     await asyncio.sleep(edit_time)
-    ok2 = await borg.edit_message(yes.chat_id, ok, file=file3)
+    ok2 = await yes.client.edit_message(yes.chat_id, ok, file=file3)
 
     await asyncio.sleep(edit_time)
-    ok3 = await borg.edit_message(yes.chat_id, ok2, file=file4)
+    ok3 = await yes.client.edit_message(yes.chat_id, ok2, file=file4)
 
     await asyncio.sleep(edit_time)
-    ok4 = await borg.edit_message(yes.chat_id, ok3, file=file5)
+    ok4 = await yes.client.edit_message(yes.chat_id, ok3, file=file5)
 
     await asyncio.sleep(edit_time)
-    ok5 = await borg.edit_message(yes.chat_id, ok4, file=file4)
+    ok5 = await yes.client.edit_message(yes.chat_id, ok4, file=file4)
 
     await asyncio.sleep(edit_time)
-    ok6 = await borg.edit_message(yes.chat_id, ok5, file=file3)
+    ok6 = await yes.client.edit_message(yes.chat_id, ok5, file=file3)
 
     await asyncio.sleep(edit_time)
-    ok7 = await borg.edit_message(yes.chat_id, ok6, file=file2)
+    ok7 = await yes.client.edit_message(yes.chat_id, ok6, file=file2)
 
     await asyncio.sleep(edit_time)
-    ok8 = await borg.edit_message(yes.chat_id, ok7, file=file1)
+    ok8 = await yes.client.edit_message(yes.chat_id, ok7, file=file1)
 
     await asyncio.sleep(edit_time)
-    ok9 = await borg.edit_message(yes.chat_id, ok8, file=file2)
+    ok9 = await yes.client.edit_message(yes.chat_id, ok8, file=file2)
 
     await asyncio.sleep(edit_time)
-    ok10 = await borg.edit_message(yes.chat_id, ok9, file=file3)
+    ok10 = await yes.client.edit_message(yes.chat_id, ok9, file=file3)
 
     await asyncio.sleep(edit_time)
-    ok11 = await borg.edit_message(yes.chat_id, ok10, file=file4)
+    ok11 = await yes.client.edit_message(yes.chat_id, ok10, file=file4)
 
     await asyncio.sleep(edit_time)
-    ok12 = await borg.edit_message(yes.chat_id, ok11, file=file5)
+    ok12 = await yes.client.edit_message(yes.chat_id, ok11, file=file5)
 
     await asyncio.sleep(edit_time)
-    ok13 = await borg.edit_message(yes.chat_id, ok12, file=file1)
+    ok13 = await yes.client.edit_message(yes.chat_id, ok12, file=file1)
 
     await yes.delete()
 
     """ For .alive command, check if the bot is running.  """
-    await borg.send_file(alive.chat_id, PM_IMG, caption=pm_caption)
+    await event.client.send_file(alive.chat_id, PM_IMG, caption=pm_caption)
     await alive.delete()
 
 CmdHelp("alive").add_command(

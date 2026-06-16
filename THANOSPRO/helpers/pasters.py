@@ -3,7 +3,8 @@ import requests
 
 from html_telegraph_poster import TelegraphPoster
 
-from THANOSPRO import *
+from THANOSPRO.config import Config
+from THANOSPRO import state
 
 headers = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.104 Safari/537.36",
@@ -26,12 +27,14 @@ async def pasty(event, message, extension=None):
             else f"https://pasty.lus.pm/{response['id']}.txt"
         )
         try:
-            await event.client.send_message(
-                Config.LOGGER_ID,
-                f"#PASTE \n\n**Open Paste From** [here]({purl}). \n**Delete that paste by using this token** `{response['deletionToken']}`",
-            )
+            if Config.LOGGER_ID:
+                await event.client.send_message(
+                    Config.LOGGER_ID,
+                    f"#PASTE \n\n**Open Paste From** [here]({purl}). \n**Delete that paste by using this token** `{response['deletionToken']}`",
+                )
         except Exception as e:
-            LOGS.info(str(e))
+            if state.LOGS:
+                state.LOGS.info(str(e))
         return {
             "url": purl,
             "raw": f"https://pasty.lus.pm/{response['id']}/raw",
@@ -61,13 +64,18 @@ async def space_paste(message, extension=None):
 
 
 async def telegraph_paste(page_title, temxt):
-    cl1ent = TelegraphPoster(use_api=True)
-    auth = "[ †he Շђคภ๏ร-קг๏ ]"
-    cl1ent.create_api_token(auth)
-    post_page = cl1ent.post(
-        title=page_title,
-        author=auth,
-        author_url="https://t.me/thanospros",
-        text=temxt,
-    )
-    return post_page["url"]
+    try:
+        cl1ent = TelegraphPoster(use_api=True)
+        auth = "[ †he Շђคภ๏ร-קг๏ ]"
+        cl1ent.create_api_token(auth)
+        post_page = cl1ent.post(
+            title=page_title,
+            author=auth,
+            author_url="https://t.me/thanospros",
+            text=temxt,
+        )
+        return post_page["url"]
+    except Exception as e:
+        if state.LOGS:
+            state.LOGS.error(f"Telegraph Paste Error: {str(e)}")
+        return f"Error: {str(e)}"

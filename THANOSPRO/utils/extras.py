@@ -17,11 +17,8 @@ from telethon.tl import functions
 from telethon.tl.functions.channels import GetParticipantRequest
 from telethon.tl.types import ChannelParticipantAdmin, ChannelParticipantCreator
 
-from THANOSPRO import *
-from THANOSPRO.helpers.pasters import pasty
-from THANOSPRO.helpers.int_str import make_int
 from THANOSPRO.config import Config
-from THANOSPRO.sql.gvar_sql import gvarstat
+# Import helpers and sql inside functions to avoid circular issues
 
 
 # either edit or reply that msg
@@ -56,6 +53,7 @@ async def edit_or_reply(
         for i in asciich:
             text = re.sub(rf"\{i}", "", text)
     if aslink or deflink:
+        from THANOSPRO.helpers.pasters import pasty
         linktext = linktext or "Message was to big so pasted to bin"
         response = await pasty(event, text)
         text = linktext + f"[BIN]({response['url']}) •• [RAW]({response['raw']})"

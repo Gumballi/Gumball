@@ -3,7 +3,7 @@ import re
 
 from telethon import events
 
-from THANOSPRO import bot
+import THANOSPRO
 from THANOSPRO.config import Config
 
 
@@ -27,8 +27,8 @@ def iadmin():
     def decorator(func):
         @functools.wraps(func)
         async def wrapper(event):
-            myid = await bot.get_me()
-            myperm = await bot.get_permissions(event.chat_id, myid)
+            myid = await THANOSPRO.bot.get_me()
+            myperm = await THANOSPRO.bot.get_permissions(event.chat_id, myid)
             if myperm.is_admin:
                 await func(event)
             if myperm.is_creator:

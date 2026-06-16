@@ -1,5 +1,6 @@
-from sqlalchemy import Column, String, Numeric, Boolean
-from . import SESSION, BASE
+from sqlalchemy import Column, String, Numeric, select, delete
+from . import BASE
+import THANOSPRO.sql as sql
 
 class forceSubscribe(BASE):
     __tablename__ = "forceSubscribe"
@@ -10,38 +11,51 @@ class forceSubscribe(BASE):
         self.chat_id = chat_id
         self.channel = channel
 
-
-forceSubscribe.__table__.create(checkfirst=True)
-
+# Table creation is handled in init_db()
 
 def is_fsub(chat_id):
+    if sql.SESSION is None: return None
     try:
-        return SESSION.query(forceSubscribe).filter(forceSubscribe.chat_id == chat_id).one()
-    except:
+        stmt = select(forceSubscribe).where(forceSubscribe.chat_id == chat_id)
+        return sql.SESSION.execute(stmt).scalars().first()
+    except Exception:
         return None
     finally:
-        SESSION.close()
-
+        sql.SESSION.remove()
 
 def add_fsub(chat_id, channel):
-    adder = SESSION.query(forceSubscribe).get(chat_id)
-    if adder:
-        adder.channel = channel
-    else:
-        adder = forceSubscribe(
-            chat_id,
-            channel
-        )
-    SESSION.add(adder)
-    SESSION.commit()
+    if sql.SESSION is None: return
+    try:
+        stmt = select(forceSubscribe).where(forceSubscribe.chat_id == chat_id)
+        adder = sql.SESSION.execute(stmt).scalars().first()
+        if adder:
+            adder.channel = channel
+        else:
+            adder = forceSubscribe(chat_id, channel)
+            sql.SESSION.add(adder)
+        sql.SESSION.commit()
+    except Exception:
+        sql.SESSION.rollback()
+    finally:
+        sql.SESSION.remove()
 
 def rm_fsub(chat_id):
-    rem = SESSION.query(forceSubscribe).get(chat_id)
-    if rem:
-        SESSION.delete(rem)
-        SESSION.commit()
+    if sql.SESSION is None: return
+    try:
+        stmt = delete(forceSubscribe).where(forceSubscribe.chat_id == chat_id)
+        sql.SESSION.execute(stmt)
+        sql.SESSION.commit()
+    except Exception:
+        sql.SESSION.rollback()
+    finally:
+        sql.SESSION.remove()
 
 def all_fsub():
-    rem = SESSION.query(forceSubscribe).all()
-    SESSION.close()
-    return rem
+    if sql.SESSION is None: return []
+    try:
+        stmt = select(forceSubscribe)
+        return sql.SESSION.execute(stmt).scalars().all()
+    except Exception:
+        return []
+    finally:
+        sql.SESSION.remove()

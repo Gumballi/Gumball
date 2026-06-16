@@ -4,8 +4,8 @@ import re
 from pathlib import Path
 from telethon import events
 
-from .session import H2, H3, H4, H5
-from THANOSPRO import CMD_LIST, LOAD_PLUG, bot
+from THANOSPRO.state import CMD_LIST, LOAD_PLUG
+import THANOSPRO
 from THANOSPRO.config import Config
 from THANOSPRO.sql.gvar_sql import gvarstat
 
@@ -66,28 +66,19 @@ def rishu_cmd(
 
     def decorator(func):
         if not disable_edited:
-            bot.add_event_handler(func, events.MessageEdited(**args, outgoing=True, pattern=rishu_reg))
-        bot.add_event_handler(func, events.NewMessage(**args, outgoing=True, pattern=rishu_reg))
+            THANOSPRO.bot.add_event_handler(func, events.MessageEdited(**args, outgoing=True, pattern=rishu_reg))
+        THANOSPRO.bot.add_event_handler(func, events.NewMessage(**args, outgoing=True, pattern=rishu_reg))
         if allow_sudo:
             if not disable_edited:
-                bot.add_event_handler(func, events.MessageEdited(**args, from_users=sudo_user, pattern=sudo_reg))
-            bot.add_event_handler(func, events.NewMessage(**args, from_users=sudo_user, pattern=sudo_reg))
-        if H2:
-            if not disable_edited:
-                H2.add_event_handler(func, events.MessageEdited(**args, outgoing=True, pattern=rishu_reg))
-            H2.add_event_handler(func, events.NewMessage(**args, outgoing=True, pattern=rishu_reg))
-        if H3:
-            if not disable_edited:
-                H3.add_event_handler(func, events.MessageEdited(**args, outgoing=True, pattern=rishu_reg))
-            H3.add_event_handler(func, events.NewMessage(**args, outgoing=True, pattern=rishu_reg))
-        if H4:
-            if not disable_edited:
-                H4.add_event_handler(func, events.MessageEdited(**args, outgoing=True, pattern=rishu_reg))
-            H4.add_event_handler(func, events.NewMessage(**args, outgoing=True, pattern=rishu_reg))
-        if H5:
-            if not disable_edited:
-                H5.add_event_handler(func, events.MessageEdited(**args, outgoing=True, pattern=rishu_reg))
-            H5.add_event_handler(func, events.NewMessage(**args, outgoing=True, pattern=rishu_reg))
+                THANOSPRO.bot.add_event_handler(func, events.MessageEdited(**args, from_users=sudo_user, pattern=sudo_reg))
+            THANOSPRO.bot.add_event_handler(func, events.NewMessage(**args, from_users=sudo_user, pattern=sudo_reg))
+        from .session import get_multi_clients
+        multi_clients = get_multi_clients()
+        for client in multi_clients.values():
+            if client:
+                if not disable_edited:
+                    client.add_event_handler(func, events.MessageEdited(**args, outgoing=True, pattern=rishu_reg))
+                client.add_event_handler(func, events.NewMessage(**args, outgoing=True, pattern=rishu_reg))
         try:
             LOAD_PLUG[file_test].append(func)
         except Exception:
@@ -101,15 +92,12 @@ def rishu_handler(
     **args,
 ):
     def decorator(func):
-        bot.add_event_handler(func, events.NewMessage(**args, incoming=True))
-        if H2:
-            H2.add_event_handler(func, events.NewMessage(**args, incoming=True))
-        if H3:
-            H3.add_event_handler(func, events.NewMessage(**args, incoming=True))
-        if H4:
-            H4.add_event_handler(func, events.NewMessage(**args, incoming=True))
-        if H5:
-            H5.add_event_handler(func, events.NewMessage(**args, incoming=True))
+        THANOSPRO.bot.add_event_handler(func, events.NewMessage(**args, incoming=True))
+        from .session import get_multi_clients
+        multi_clients = get_multi_clients()
+        for client in multi_clients.values():
+            if client:
+                client.add_event_handler(func, events.NewMessage(**args, incoming=True))
         return func
 
     return decorator

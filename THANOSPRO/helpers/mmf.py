@@ -4,7 +4,7 @@ import random
 import shutil
 import re
 import textwrap
-import lottie
+# import lottie # unused here and problematic
 
 from PIL import Image, ImageDraw, ImageEnhance, ImageFont, ImageOps
 
@@ -25,7 +25,7 @@ async def draw_meme_text(image_path, text):
     current_h, pad = 10, 5
     if upper_text:
         for u_text in textwrap.wrap(upper_text, width=15):
-            u_width, u_height = draw.textsize(u_text, font=m_font)
+            u_width, u_height = draw.textbbox((0, 0), u_text, font=m_font)[2:]
 
             draw.text(
                 xy=(((i_width - u_width) / 2) - 1, int((current_h / 640) * i_width)),
@@ -61,7 +61,7 @@ async def draw_meme_text(image_path, text):
             current_h += u_height + pad
     if lower_text:
         for l_text in textwrap.wrap(lower_text, width=15):
-            u_width, u_height = draw.textsize(l_text, font=m_font)
+            u_width, u_height = draw.textbbox((0, 0), l_text, font=m_font)[2:]
 
             draw.text(
                 xy=(
@@ -132,7 +132,7 @@ async def draw_meme(image_path, text):
     current_h, pad = 10, 5
     if upper_text:
         for u_text in textwrap.wrap(upper_text, width=15):
-            u_width, u_height = draw.textsize(u_text, font=m_font)
+            u_width, u_height = draw.textbbox((0, 0), u_text, font=m_font)[2:]
             draw.text(
                 xy=(((i_width - u_width) / 2) - 1, int((current_h / 640) * i_width)),
                 text=u_text,
@@ -166,7 +166,7 @@ async def draw_meme(image_path, text):
             current_h += u_height + pad
     if lower_text:
         for l_text in textwrap.wrap(lower_text, width=15):
-            u_width, u_height = draw.textsize(l_text, font=m_font)
+            u_width, u_height = draw.textbbox((0, 0), l_text, font=m_font)[2:]
             draw.text(
                 xy=(
                     ((i_width - u_width) / 2) - 1,

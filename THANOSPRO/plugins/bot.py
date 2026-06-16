@@ -11,6 +11,7 @@ from telethon.tl.functions.channels import LeaveChannelRequest
 
 from ..sql.gvar_sql import gvarstat
 from . import *
+from THANOSPRO.state import StartTime
 
 ping_txt = """
 <b><i>╰•★★  ℘ơŋɠ ★★•╯</b></i>
@@ -73,7 +74,7 @@ async def leave(e):
         await e.edit("😪 **KThnxBye** See u all in rishu!!")
         time.sleep(1)
         if "-" in str(e.chat_id):
-            await event.client(LeaveChannelRequest(e.chat_id))
+            await e.client(LeaveChannelRequest(e.chat_id))
         else:
             await eod(e, "**Iz this even a grp?😑**")
 

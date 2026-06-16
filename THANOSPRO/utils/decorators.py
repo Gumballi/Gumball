@@ -1,21 +1,11 @@
-import datetime
 import inspect
-import os
 import re
-import sys
-
 from pathlib import Path
-
-from telethon import TelegramClient, events
-from telethon.errors import MessageIdInvalidError, MessageNotModifiedError
-
-from THANOSPRO import LOGS, bot, tbot
-from THANOSPRO.clients import H2, H3, H4, H5
+from telethon import events
+import THANOSPRO
+from THANOSPRO.state import CMD_LIST, SUDO_LIST, LOAD_PLUG
 from THANOSPRO.config import Config
-from THANOSPRO.helpers import *
 
-
-# admin cmd or normal user cmd
 def admin_cmd(pattern=None, command=None, **args):
     args["func"] = lambda e: e.via_bot_id is None
     stack = inspect.stack()
@@ -23,10 +13,9 @@ def admin_cmd(pattern=None, command=None, **args):
     file_test = Path(previous_stack_frame.filename)
     file_test = file_test.stem.replace(".py", "")
     allow_sudo = args.get("allow_sudo", False)
-    # get the pattern from the decorator
+    
     if pattern is not None:
         if pattern.startswith(r"\#"):
-            # special fix for snip.py
             args["pattern"] = re.compile(pattern)
         elif pattern.startswith(r"^"):
             args["pattern"] = re.compile(pattern)
@@ -36,53 +25,34 @@ def admin_cmd(pattern=None, command=None, **args):
             except BaseException:
                 CMD_LIST.update({file_test: [cmd]})
         else:
-            if len(Config.HANDLER) == 2:
-                rishureg = "^" + Config.HANDLER
-                reg = Config.HANDLER[1]
-            elif len(Config.HANDLER) == 1:
-                rishureg = "^\\" + Config.HANDLER
-                reg = Config.HANDLER
-            args["pattern"] = re.compile(rishureg + pattern)
-            if command is not None:
-                cmd = reg + command
+            handler = Config.HANDLER
+            if len(handler) == 2:
+                rishureg = "^" + handler
+                reg = handler[1]
             else:
-                cmd = (
-                    (reg + pattern).replace("$", "").replace("\\", "").replace("^", "")
-                )
+                rishureg = "^\\" + handler
+                reg = handler
+            args["pattern"] = re.compile(rishureg + pattern)
+            cmd = reg + (command or pattern.replace("$", "").replace("\\", "").replace("^", ""))
             try:
                 CMD_LIST[file_test].append(cmd)
             except BaseException:
                 CMD_LIST.update({file_test: [cmd]})
 
     args["outgoing"] = True
-    # decides that other users can use it or not
-    # THANOSPRO outgoing
     if allow_sudo:
         args["from_users"] = list(Config.SUDO_USERS)
-        # Mutually exclusive with outgoing (can only set one of either).
         args["incoming"] = True
-        del args["allow_sudo"]
-
-    # error handling condition check
+        if "allow_sudo" in args: del args["allow_sudo"]
     elif "incoming" in args and not args["incoming"]:
         args["outgoing"] = True
 
-    # blacklisted chats. 
-    # THANOSPRO will not respond in these chats.
     args["blacklist_chats"] = True
     black_list_chats = list(Config.BL_CHAT)
     if black_list_chats:
         args["chats"] = black_list_chats
 
-    # blacklisted chats.
-    # THANOSPRO will not respond in these chats.
-    if "allow_edited_updates" in args and args["allow_edited_updates"]:
-        del args["allow_edited_updates"]
-
-    # plugin check for outgoing commands
-    
     return events.NewMessage(**args)
-
 
 def sudo_cmd(pattern=None, command=None, **args):
     args["func"] = lambda e: e.via_bot_id is None
@@ -91,10 +61,9 @@ def sudo_cmd(pattern=None, command=None, **args):
     file_test = Path(previous_stack_frame.filename)
     file_test = file_test.stem.replace(".py", "")
     allow_sudo = args.get("allow_sudo", False)
-    # get the pattern from the decorator
+    
     if pattern is not None:
         if pattern.startswith(r"\#"):
-            # special fix for snip.py
             args["pattern"] = re.compile(pattern)
         elif pattern.startswith(r"^"):
             args["pattern"] = re.compile(pattern)
@@ -104,213 +73,51 @@ def sudo_cmd(pattern=None, command=None, **args):
             except BaseException:
                 SUDO_LIST.update({file_test: [cmd]})
         else:
-            if len(Config.SUDO_HANDLER) == 2:
-                rishureg = "^" + Config.SUDO_HANDLER
-                reg = Config.SUDO_HANDLER[1]
-            elif len(Config.SUDO_HANDLER) == 1:
-                rishureg = "^\\" + Config.SUDO_HANDLER
+            handler = Config.SUDO_HANDLER
+            if len(handler) == 2:
+                rishureg = "^" + handler
+                reg = handler[1]
+            else:
+                rishureg = "^\\" + handler
                 reg = Config.HANDLER
             args["pattern"] = re.compile(rishureg + pattern)
-            if command is not None:
-                cmd = reg + command
-            else:
-                cmd = (
-                    (reg + pattern).replace("$", "").replace("\\", "").replace("^", "")
-                )
+            cmd = reg + (command or pattern.replace("$", "").replace("\\", "").replace("^", ""))
             try:
                 SUDO_LIST[file_test].append(cmd)
             except BaseException:
                 SUDO_LIST.update({file_test: [cmd]})
+    
     args["outgoing"] = True
-    # outgoing check
-    # THANOSPRO
     if allow_sudo:
         args["from_users"] = list(Config.SUDO_USERS)
-        # Mutually exclusive with outgoing (can only set one of either).
         args["incoming"] = True
-        del args["allow_sudo"]
-    # error handling condition check
+        if "allow_sudo" in args: del args["allow_sudo"]
     elif "incoming" in args and not args["incoming"]:
         args["outgoing"] = True
-    # blacklisted chats
-    # THANOSPRO won't respond here
+        
     args["blacklist_chats"] = True
     black_list_chats = list(Config.BL_CHAT)
     if black_list_chats:
         args["chats"] = black_list_chats
-    # blacklisted chats
-    # THANOSPRO won't respond here
-    if "allow_edited_updates" in args and args["allow_edited_updates"]:
-        del args["allow_edited_updates"]
-    # outgoing check
-    # THANOSPRO
+        
     return events.NewMessage(**args)
-
-
-on = bot.on
-
 
 def on(**args):
     def decorator(func):
-        async def wrapper(event):
-            await func(event)
-        bot.add_event_handler(wrapper, events.NewMessage(**args))
-        if H2:
-            H2.add_event_handler(wrapper, events.NewMessage(**args))
-        if H3:
-            H3.add_event_handler(wrapper, events.NewMessage(**args))
-        if H4:
-            H4.add_event_handler(wrapper, events.NewMessage(**args))
-        if H5:
-            H5.add_event_handler(wrapper, events.NewMessage(**args))
-        return wrapper
+        if THANOSPRO.bot:
+            THANOSPRO.bot.add_event_handler(func, events.NewMessage(**args))
+        from THANOSPRO.clients.session import get_multi_clients
+        multi_clients = get_multi_clients()
+        for client in multi_clients.values():
+            if client:
+                client.add_event_handler(func, events.NewMessage(**args))
+        return func
+    return decorator
 
-    return decorater
-
-
-# register decorate
 def register(**args):
-    args["func"] = lambda e: e.via_bot_id is None
-    stack = inspect.stack()
-    previous_stack_frame = stack[1]
-    file_test = Path(previous_stack_frame.filename)
-    file_test = file_test.stem.replace(".py", "")
-    pattern = args.get("pattern", None)
-    disable_edited = args.get("disable_edited", True)
-    allow_sudo = args.get("allow_sudo", False)
-
-    if pattern is not None and not pattern.startswith("(?i)"):
-        args["pattern"] = "(?i)" + pattern
-
-    if "disable_edited" in args:
-        del args["disable_edited"]
-
-    reg = re.compile("(.*)")
-    if pattern is not None:
-        try:
-            cmd = re.search(reg, pattern)
-            try:
-                cmd = cmd.group(1).replace("$", "").replace("\\", "").replace("^", "")
-            except BaseException:
-                pass
-
-            try:
-                CMD_LIST[file_test].append(cmd)
-            except BaseException:
-                CMD_LIST.update({file_test: [cmd]})
-        except BaseException:
-            pass
-
-    if allow_sudo:
-        args["from_users"] = list(Config.SUDO_USERS)
-        # Mutually exclusive with outgoing (can only set one of either).
-        args["incoming"] = True
-        del args["allow_sudo"]
-
-    # error handling condition check
-    elif "incoming" in args and not args["incoming"]:
-        args["outgoing"] = True
-
-    # add blacklist chats, UB should not respond in these chats
-    args["blacklist_chats"] = True
-    black_list_chats = list(Config.BL_CHAT)
-    if len(black_list_chats) > 0:
-        args["chats"] = black_list_chats
-
+    # Simplified version for compatibility
     def decorator(func):
-        if not disable_edited:
-            bot.add_event_handler(func, events.MessageEdited(**args))
-        bot.add_event_handler(func, events.NewMessage(**args))
-        if H2:
-            H2.add_event_handler(func, events.NewMessage(**args))
-        if H3:
-            H3.add_event_handler(func, events.NewMessage(**args))
-        if H4:
-            H4.add_event_handler(func, events.NewMessage(**args))
-        if H5:
-            H5.add_event_handler(func, events.NewMessage(**args))
-        try:
-            LOAD_PLUG[file_test].append(func)
-        except Exception:
-            LOAD_PLUG.update({file_test: [func]})
+        if THANOSPRO.bot:
+            THANOSPRO.bot.add_event_handler(func, events.NewMessage(**args))
         return func
-
     return decorator
-
-
-# command decorations
-def command(**args):
-    args["func"] = lambda e: e.via_bot_id is None
-
-    stack = inspect.stack()
-    previous_stack_frame = stack[1]
-    file_test = Path(previous_stack_frame.filename)
-    file_test = file_test.stem.replace(".py", "")
-
-    pattern = args.get("pattern", None)
-    allow_sudo = args.get("allow_sudo", None)
-    allow_edited_updates = args.get("allow_edited_updates", False)
-    args["incoming"] = args.get("incoming", False)
-    args["outgoing"] = True
-    if bool(args["incoming"]):
-        args["outgoing"] = False
-
-    try:
-        if pattern is not None and not pattern.startswith("(?i)"):
-            args["pattern"] = "(?i)" + pattern
-    except BaseException:
-        pass
-
-    reg = re.compile("(.*)")
-    if pattern is not None:
-        try:
-            cmd = re.search(reg, pattern)
-            try:
-                cmd = cmd.group(1).replace("$", "").replace("\\", "").replace("^", "")
-            except BaseException:
-                pass
-            try:
-                CMD_LIST[file_test].append(cmd)
-            except BaseException:
-                CMD_LIST.update({file_test: [cmd]})
-        except BaseException:
-            pass
-    if allow_sudo:
-        args["from_users"] = list(Config.SUDO_USERS)
-        # Mutually exclusive with outgoing (can only set one of either).
-        args["incoming"] = True
-    del allow_sudo
-    try:
-        del args["allow_sudo"]
-    except BaseException:
-        pass
-
-    args["blacklist_chats"] = True
-    black_list_chats = list(Config.BL_CHAT)
-    if len(black_list_chats) > 0:
-        args["chats"] = black_list_chats
-
-    if "allow_edited_updates" in args:
-        del args["allow_edited_updates"]
-
-    def decorator(func):
-        if allow_edited_updates:
-            bot.add_event_handler(func, events.MessageEdited(**args))
-        bot.add_event_handler(func, events.NewMessage(**args))
-        if H2:
-            H2.add_event_handler(func, events.NewMessage(**args))
-        if H3:
-            H3.add_event_handler(func, events.NewMessage(**args))
-        if H4:
-            H4.add_event_handler(func, events.NewMessage(**args))
-        if H5:
-            H5.add_event_handler(func, events.NewMessage(**args))
-        try:
-            LOAD_PLUG[file_test].append(func)
-        except BaseException:
-            LOAD_PLUG.update({file_test: [func]})
-        return func
-
-    return decorator
-
-# THANOSPRO

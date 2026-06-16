@@ -16,10 +16,8 @@ from telethon import events
 from telethon.tl.functions.channels import GetParticipantRequest
 from telethon.tl.types import ChannelParticipantAdmin, ChannelParticipantCreator
 
-from THANOSPRO import *
 from THANOSPRO.config import Config
-from THANOSPRO.helpers import *
-from THANOSPRO.utils import *
+# Import other helpers and utils inside functions if needed
 
 async def reply_id(event):
     reply_to_id = None

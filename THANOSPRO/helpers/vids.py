@@ -14,7 +14,8 @@ from telethon.errors.rpcerrorlist import YouBlockedUserError
 from telethon.tl import functions
 from telethon.utils import get_input_document
 
-from THANOSPRO import LOGS, bot
+import THANOSPRO
+from THANOSPRO.state import LOGS
 
 # generate thumbnail from audio...
 async def thumb_from_audio(audio_path, output):

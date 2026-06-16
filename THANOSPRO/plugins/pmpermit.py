@@ -5,8 +5,8 @@ import os
 from telethon import events, functions
 from telethon.tl.functions.users import GetFullUserRequest
 
-from THANOSPRO.sql import pmpermit_sql as pm_sql
 from . import *
+from THANOSPRO.sql import pmpermit_sql as pm_sql
 
 PM_WARNS = {}
 PREV_REPLY_MESSAGE = {}
@@ -261,7 +261,7 @@ if Config.INSTANT_BLOCK == "ENABLE":
             return
         if sender.verified:
             return
-        if not pmpermit_sql.is_approved(chat_id):
+        if not pm_sql.is_approved(chat_id):
             await event.client(functions.contacts.BlockRequest(chat_id))
 
 

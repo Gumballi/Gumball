@@ -9,6 +9,7 @@ from telethon.tl.functions.users import GetFullUserRequest
 from telethon.tl.types import ChatAdminRights, ChatBannedRights, ChannelParticipantsAdmins, MessageEntityMentionName, MessageMediaPhoto
 
 from . import *
+from THANOSPRO.state import LOGS
 from THANOSPRO.sql.mute_sql import is_muted, mute, unmute
 
 
@@ -147,8 +148,7 @@ async def demote(event):
         return
     rishuevent = await eor(event, "`Demoting User...`")
     rank = "ǟɖʍɨռ"
-    user = await get_user_from_event(event)
-    user = user[0]
+    user, _ = await get_user_from_event(event)
     if not user:
         return
     newrights = ChatAdminRights(
@@ -373,8 +373,7 @@ async def nothanos(event):
         await eor(event, NO_ADMIN)
         return
     rishuevent = await eor(event, "`Unbanning...`")
-    user = await get_user_from_event(event)
-    user = user[0]
+    user, _ = await get_user_from_event(event)
     if not user:
         return
     try:

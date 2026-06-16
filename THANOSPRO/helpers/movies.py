@@ -1,5 +1,5 @@
 import os
-from imdb import IMDb
+from imdb import Cinemagoer as IMDb
 from justwatch import JustWatch
 
 

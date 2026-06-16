@@ -2,8 +2,9 @@ import os
 
 from telethon.tl.functions.users import GetFullUserRequest
 
-from THANOSPRO.sql.gvar_sql import addgvar, gvarstat, delgvar
 from . import *
+from THANOSPRO.sql.gvar_sql import addgvar, gvarstat, delgvar
+from THANOSPRO.helpers.int_str import make_int
 
 
 @rishu_cmd(pattern="sudo$")

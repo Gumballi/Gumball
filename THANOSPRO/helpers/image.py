@@ -1,9 +1,6 @@
 import asyncio
 import os
-try:
-    pass
-except:
-    os.system("pip install colour")
+# colour should be in requirements.txt
 import re
 import requests
 

@@ -11,7 +11,7 @@ DEFAULTUSER = str(Config.ALIVE_NAME) if Config.ALIVE_NAME else "@thanosceo"
 
 
 
-@bot.on(admin_cmd(pattern=r"ashayri$", outgoing=True))
+@rishu_cmd(pattern=r"ashayri$")
 async def _(event):
     if event.fwd_from:
         return

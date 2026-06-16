@@ -21,7 +21,7 @@ async def get_media(event):
         f.write(str(msgs))
     for msg in msgs:
         if msg.media is not None:
-            await client.event.download_media(msg, dir)
+            await event.client.download_media(msg, dir)
     ps = subprocess.Popen(("ls", "channel_dwl"), stdout=subprocess.PIPE)
     output = subprocess.check_output(("wc", "-l"), stdin=ps.stdout)
     ps.wait()
@@ -43,7 +43,7 @@ async def get_media(event):
 
     print(channel_username)
     rishu = await eor(event, "Downloading All Media From this Channel.")
-    msgs = await bot.get_messages(channel_username, limit=3000)
+    msgs = await event.client.get_messages(channel_username, limit=3000)
     with open("log.txt", "w") as f:
         f.write(str(msgs))
     for msg in msgs:

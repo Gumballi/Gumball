@@ -1,7 +1,6 @@
-from sqlalchemy import Column, String
-
-from . import BASE, SESSION
-
+from sqlalchemy import Column, String, select, delete
+from . import BASE
+import THANOSPRO.sql as sql
 
 class ECHOSQL(BASE):
     __tablename__ = "echo_sql"
@@ -12,36 +11,47 @@ class ECHOSQL(BASE):
         self.user_id = str(user_id)
         self.chat_id = str(chat_id)
 
-
-ECHOSQL.__table__.create(checkfirst=True)
-
+# Table creation is handled in init_db()
 
 def is_echo(user_id, chat_id):
+    if sql.SESSION is None: return None
     try:
-        return SESSION.query(ECHOSQL).get((str(user_id), str(chat_id)))
-    except BaseException:
+        stmt = select(ECHOSQL).where(ECHOSQL.user_id == str(user_id), ECHOSQL.chat_id == str(chat_id))
+        return sql.SESSION.execute(stmt).scalars().first()
+    except Exception:
         return None
     finally:
-        SESSION.close()
-
+        sql.SESSION.remove()
 
 def get_all_echos():
+    if sql.SESSION is None: return []
     try:
-        return SESSION.query(ECHOSQL).all()
-    except BaseException:
-        return None
+        stmt = select(ECHOSQL)
+        return sql.SESSION.execute(stmt).scalars().all()
+    except Exception:
+        return []
     finally:
-        SESSION.close()
-
+        sql.SESSION.remove()
 
 def addecho(user_id, chat_id):
-    adder = ECHOSQL(str(user_id), str(chat_id))
-    SESSION.add(adder)
-    SESSION.commit()
-
+    if sql.SESSION is None: return
+    try:
+        if not is_echo(user_id, chat_id):
+            adder = ECHOSQL(str(user_id), str(chat_id))
+            sql.SESSION.add(adder)
+            sql.SESSION.commit()
+    except Exception:
+        sql.SESSION.rollback()
+    finally:
+        sql.SESSION.remove()
 
 def remove_echo(user_id, chat_id):
-    note = SESSION.query(ECHOSQL).get((str(user_id), str(chat_id)))
-    if note:
-        SESSION.delete(note)
-        SESSION.commit()
+    if sql.SESSION is None: return
+    try:
+        stmt = delete(ECHOSQL).where(ECHOSQL.user_id == str(user_id), ECHOSQL.chat_id == str(chat_id))
+        sql.SESSION.execute(stmt)
+        sql.SESSION.commit()
+    except Exception:
+        sql.SESSION.rollback()
+    finally:
+        sql.SESSION.remove()

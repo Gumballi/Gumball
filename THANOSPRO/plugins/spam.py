@@ -35,7 +35,7 @@ async def bigspam(event):
     for i in range(THANOSPRO_count):
         await event.client.send_message(event.chat_id, rishu_spam, reply_to=reply_msg)
     await event.delete()
-    await event.client.send_message(lg_id, f"#BIGSPAM \n\nBigspammed  `{rishu_count}`  messages !!")
+    await event.client.send_message(lg_id, f"#BIGSPAM \n\nBigspammed  `{THANOSPRO_count}`  messages !!")
 
 
 @rishu_cmd(pattern="dspam(?:\s|$)([\s\S]*)")

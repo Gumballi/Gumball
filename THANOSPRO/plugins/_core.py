@@ -12,20 +12,19 @@ from . import *
 
 
 @rishu_cmd(pattern="cmds$")
-async def kk(event):
+async def list_plugins(event):
     reply_to_id = event.message.id
     if event.reply_to_msg_id:
         reply_to_id = event.reply_to_msg_id
     cids = await client_id(event)
     ultronceo, rishu_USER, rishu_mention = cids[0], cids[1], cids[2]
-    cmd = "ls THANOSPRO/plugins"
-    process = await asyncio.create_subprocess_srishu(
-        cmd, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
-    )
-    stdout, stderr = await process.communicate()
-    o = stdout.decode()
-    _o = o.split("\n")
-    o = "\n".join(_o)
+    
+    plugins = []
+    for file in os.listdir("THANOSPRO/plugins"):
+        if file.endswith(".py") and not file.startswith("__"):
+            plugins.append(file.replace(".py", ""))
+    
+    o = "\n".join(sorted(plugins))
     OUTPUT = f"""
 <h1>List of Plugins in Շђคภ๏ร-קг๏:</h1>
 
@@ -40,12 +39,12 @@ async def kk(event):
 
 
 @rishu_cmd(pattern="send ([\s\S]*)")
-async def send(event):
+async def send_plugin(event):
     cids = await client_id(event)
     ultronceo, rishu_USER, rishu_mention = cids[0], cids[1], cids[2]
     message_id = event.reply_to_msg_id or event.message.id
     thumb = rishu_logo
-    input_str = event.pattern_match.group(1)
+    input_str = event.pattern_match.group(1).strip()
     omk = f"**• Plugin name ≈** `{input_str}`\n**• Uploaded by ≈** {rishu_mention}\n\n⚡ **[ʟɛɢɛռɖaʀʏ ᴀғ Շђคภ๏รקг๏]({chnl_link})** ⚡"
     the_plugin_file = "./THANOSPRO/plugins/{}.py".format(input_str.lower())
     if os.path.exists(the_plugin_file):
@@ -68,18 +67,17 @@ async def install(event):
     cids = await client_id(event)
     ultronceo, rishu_USER, rishu_mention = cids[0], cids[1], cids[2]
     b = 1
-    owo = event.text[9:]
+    owo = event.pattern_match.group(1).strip()
     rishu = await eor(event, "__Installing.__")
     if event.reply_to_msg_id:
         try:
-            downloaded_file_name = await event.client.download_media(  # pylint:disable=E0602
+            downloaded_file_name = await event.client.download_media(
                 await event.get_reply_message(),
-                "./THANOSPRO/plugins/"  # pylint:disable=E0602
+                "./THANOSPRO/plugins/"
             )
             if owo != "-f":
-                op = open(downloaded_file_name, "r")
-                rd = op.read()
-                op.close()
+                with open(downloaded_file_name, "r") as op:
+                    rd = op.read()
                 try:
                     for harm in HARMFUL:
                         if harm in rd:
@@ -110,19 +108,21 @@ async def install(event):
                 return await eod(rishu, f"**Failed to Install** \n`Error`\nModule already installed or unknown format")
         except Exception as e: 
             await eod(rishu, f"**Failed to Install** \n`Error`\n{str(e)}")
-            return os.remove(downloaded_file_name)
+            if 'downloaded_file_name' in locals() and os.path.exists(downloaded_file_name):
+                os.remove(downloaded_file_name)
 
 
 @rishu_cmd(pattern="uninstall ([\s\S]*)")
 async def uninstall(event):
-    shortname = event.text[11:]
+    shortname = event.pattern_match.group(1).strip()
     if ".py" in shortname:
         shortname = shortname.replace(".py", "")
     rishu = await eor(event, f"__Trying to uninstall plugin__ `{shortname}` ...")
     dir_path =f"./THANOSPRO/plugins/{shortname}.py"
     try:
         remove_plugin(shortname)
-        os.remove(dir_path)
+        if os.path.exists(dir_path):
+            os.remove(dir_path)
         await eod(rishu, f"**Uninstalled plugin** `{shortname}` **successfully.**")
     except OSError as e:
         await eod(rishu, f"**Error !!** \n\n`{dir_path}` : __{e.strerror}__")
@@ -130,21 +130,17 @@ async def uninstall(event):
 
 @rishu_cmd(pattern="unload ([\s\S]*)")
 async def unload(event):
-    shortname = event.pattern_match["shortname"]
+    shortname = event.pattern_match.group(1).strip()
     try:
         remove_plugin(shortname)
         await event.edit(f"Successfully unloaded `{shortname}`")
     except Exception as e:
-        await event.edit(
-            "Successfully unloaded {shortname}\n{}".format(
-                shortname, str(e)
-            )
-        )
+        await event.edit(f"Failed to unload {shortname}\n{str(e)}")
 
 
 @rishu_cmd(pattern="load ([\s\S]*)")
 async def load(event):
-    shortname = event.pattern_match["shortname"]
+    shortname = event.pattern_match.group(1).strip()
     try:
         try:
             remove_plugin(shortname)

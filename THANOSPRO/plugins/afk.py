@@ -6,6 +6,7 @@ from telethon.tl import functions, types
 
 from THANOSPRO.sql.gvar_sql import addgvar, gvarstat, delgvar
 from . import *
+from THANOSPRO.helpers.vids import unsave_gif
 
 
 global afk_time_1

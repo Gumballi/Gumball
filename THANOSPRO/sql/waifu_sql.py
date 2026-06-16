@@ -1,6 +1,6 @@
-from sqlalchemy import Boolean, Column, Integer, String, UnicodeText
-from . import BASE, SESSION
-
+from sqlalchemy import Column, String, select, delete
+from . import BASE
+import THANOSPRO.sql as sql
 
 class Harem(BASE):
     __tablename__ = "harem"
@@ -9,33 +9,50 @@ class Harem(BASE):
     def __init__(self, chat_id):
         self.chat_id = chat_id
 
-
-Harem.__table__.create(checkfirst=True)
-
+# Table creation is handled in init_db()
 
 def add_grp(chat_id: str):
-    waifu = Harem(str(chat_id))
-    SESSION.add(waifu)
-    SESSION.commit()
-
+    if sql.SESSION is None: return
+    try:
+        if not is_harem(chat_id):
+            waifu = Harem(str(chat_id))
+            sql.SESSION.add(waifu)
+            sql.SESSION.commit()
+    except Exception:
+        sql.SESSION.rollback()
+    finally:
+        sql.SESSION.remove()
 
 def rm_grp(chat_id: str):
-    waifu = SESSION.query(Harem).get(str(chat_id))
-    if waifu:
-        SESSION.delete(waifu)
-        SESSION.commit()
-
+    if sql.SESSION is None: return
+    try:
+        stmt = delete(Harem).where(Harem.chat_id == str(chat_id))
+        sql.SESSION.execute(stmt)
+        sql.SESSION.commit()
+    except Exception:
+        sql.SESSION.rollback()
+    finally:
+        sql.SESSION.remove()
 
 def get_all_grp():
-    waifu = SESSION.query(Harem).all()
-    SESSION.close()
-    return waifu
-
+    if sql.SESSION is None: return []
+    try:
+        stmt = select(Harem)
+        return sql.SESSION.execute(stmt).scalars().all()
+    except Exception:
+        return []
+    finally:
+        sql.SESSION.remove()
 
 def is_harem(chat_id: str):
+    if sql.SESSION is None: return None
     try:
-        waifu = SESSION.query(Harem).get(str(chat_id))
+        stmt = select(Harem).where(Harem.chat_id == str(chat_id))
+        waifu = sql.SESSION.execute(stmt).scalars().first()
         if waifu:
             return str(waifu.chat_id)
+        return None
+    except Exception:
+        return None
     finally:
-        SESSION.close()
+        sql.SESSION.remove()

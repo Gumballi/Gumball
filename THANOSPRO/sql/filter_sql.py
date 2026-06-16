@@ -1,7 +1,6 @@
-from sqlalchemy import Column, LargeBinary, Numeric, String, UnicodeText
-
-from . import BASE, SESSION
-
+from sqlalchemy import Column, LargeBinary, Numeric, String, UnicodeText, select, delete
+from . import BASE
+import THANOSPRO.sql as sql
 
 class Filters(BASE):
     __tablename__ = "filters"
@@ -13,16 +12,7 @@ class Filters(BASE):
     media_access_hash = Column(UnicodeText)
     media_file_reference = Column(LargeBinary)
 
-    def __init__(
-        self,
-        chat_id,
-        keyword,
-        reply,
-        snip_type,
-        media_id=None,
-        media_access_hash=None,
-        media_file_reference=None,
-    ):
+    def __init__(self, chat_id, keyword, reply, snip_type, media_id=None, media_access_hash=None, media_file_reference=None):
         self.chat_id = chat_id
         self.keyword = keyword
         self.reply = reply
@@ -31,67 +21,66 @@ class Filters(BASE):
         self.media_access_hash = media_access_hash
         self.media_file_reference = media_file_reference
 
-
-Filters.__table__.create(checkfirst=True)
-
+# Table creation is handled in init_db()
 
 def get_filter(chat_id, keyword):
+    if sql.SESSION is None: return None
     try:
-        return SESSION.query(Filters).get((str(chat_id), keyword))
-    except:
+        stmt = select(Filters).where(Filters.chat_id == str(chat_id), Filters.keyword == keyword)
+        return sql.SESSION.execute(stmt).scalars().first()
+    except Exception:
         return None
     finally:
-        SESSION.close()
-
+        sql.SESSION.remove()
 
 def get_all_filters(chat_id):
+    if sql.SESSION is None: return []
     try:
-        return SESSION.query(Filters).filter(Filters.chat_id == str(chat_id)).all()
-    except:
-        return None
+        stmt = select(Filters).where(Filters.chat_id == str(chat_id))
+        return sql.SESSION.execute(stmt).scalars().all()
+    except Exception:
+        return []
     finally:
-        SESSION.close()
+        sql.SESSION.remove()
 
-
-def add_filter(
-    chat_id,
-    keyword,
-    reply,
-    snip_type,
-    media_id,
-    media_access_hash,
-    media_file_reference,
-):
-    adder = SESSION.query(Filters).get((str(chat_id), keyword))
-    if adder:
-        adder.reply = reply
-        adder.snip_type = snip_type
-        adder.media_id = media_id
-        adder.media_access_hash = media_access_hash
-        adder.media_file_reference = media_file_reference
-    else:
-        adder = Filters(
-            chat_id,
-            keyword,
-            reply,
-            snip_type,
-            media_id,
-            media_access_hash,
-            media_file_reference,
-        )
-    SESSION.add(adder)
-    SESSION.commit()
-
+def add_filter(chat_id, keyword, reply, snip_type, media_id, media_access_hash, media_file_reference):
+    if sql.SESSION is None: return
+    try:
+        stmt = select(Filters).where(Filters.chat_id == str(chat_id), Filters.keyword == keyword)
+        adder = sql.SESSION.execute(stmt).scalars().first()
+        if adder:
+            adder.reply = reply
+            adder.snip_type = snip_type
+            adder.media_id = media_id
+            adder.media_access_hash = media_access_hash
+            adder.media_file_reference = media_file_reference
+        else:
+            adder = Filters(chat_id, keyword, reply, snip_type, media_id, media_access_hash, media_file_reference)
+            sql.SESSION.add(adder)
+        sql.SESSION.commit()
+    except Exception:
+        sql.SESSION.rollback()
+    finally:
+        sql.SESSION.remove()
 
 def remove_filter(chat_id, keyword):
-    saved_filter = SESSION.query(Filters).get((str(chat_id), keyword))
-    if saved_filter:
-        SESSION.delete(saved_filter)
-        SESSION.commit()
-
+    if sql.SESSION is None: return
+    try:
+        stmt = delete(Filters).where(Filters.chat_id == str(chat_id), Filters.keyword == keyword)
+        sql.SESSION.execute(stmt)
+        sql.SESSION.commit()
+    except Exception:
+        sql.SESSION.rollback()
+    finally:
+        sql.SESSION.remove()
 
 def remove_all_filters(chat_id):
-    saved_filter = SESSION.query(Filters).filter(Filters.chat_id == str(chat_id))
-    if saved_filter:
-        saved_filter.delete()
-        SESSION.commit()
+    if sql.SESSION is None: return
+    try:
+        stmt = delete(Filters).where(Filters.chat_id == str(chat_id))
+        sql.SESSION.execute(stmt)
+        sql.SESSION.commit()
+    except Exception:
+        sql.SESSION.rollback()
+    finally:
+        sql.SESSION.remove()

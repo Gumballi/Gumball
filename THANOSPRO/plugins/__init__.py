@@ -1,21 +1,19 @@
 import datetime
 import time
-
-from THANOSPRO import *
-from THANOSPRO.clients import *
+import THANOSPRO
 from THANOSPRO.config import Config
-from THANOSPRO.helpers import *
-from THANOSPRO.utils import *
-from THANOSPRO.random_strings import *
 from THANOSPRO.version import __rishu__
-from THANOSPRO.sql.gvar_sql import gvarstat
 from telethon import version
+
+# Use delayed imports for helpers and utils inside functions
+# from THANOSPRO.sql.gvar_sql import gvarstat
 
 rishu_logo = "./THANOSPRO/resources/pics/THANOSPRO_logo.jpg"
 cjb = "./THANOSPRO/resources/pics/cjb.jpg"
 restlo = "./THANOSPRO/resources/pics/rest.jpeg"
 shuru = "./THANOSPRO/resources/pics/shuru.jpg"
 shhh = "./THANOSPRO/resources/pics/chup_madarchod.jpeg"
+
 hl = Config.HANDLER
 shl = Config.SUDO_HANDLER
 rishu_ver = __rishu__
@@ -25,17 +23,13 @@ async def get_user_id(ids):
     if str(ids).isdigit():
         userid = int(ids)
     else:
-        userid = (await bot.get_entity(ids)).id
+        userid = (await THANOSPRO.bot.get_entity(ids)).id
     return userid
 
-is_sudo = "True" if gvarstat("SUDO_USERS") else "False"
-
-abus = Config.ABUSE
-if abus == "ON":
-    abuse_m = "Enabled"
-else:
-    abuse_m ="Disabled"
-
+# Move dynamic variables to properties or functions
+def get_abuse_status():
+    abus = Config.ABUSE
+    return "Enabled" if abus == "ON" else "Disabled"
 
 my_channel = Config.MY_CHANNEL or "thanospros"
 my_group = Config.MY_GROUP or "THANOSPRO_Chat"
@@ -49,7 +43,7 @@ rishu_channel = f"[Շђคภ๏ร-קг๏]({chnl_link})"
 grp_link = "https://t.me/THANOSPRO_Chat"
 rishu_grp = f"[Շђคภ๏ร-קг๏ Group]({grp_link})"
 
-WELCOME_FORMAT = """**Use these fomats in your welcome note to make them attractive.**
+WELCOME_FORMAT = """**Use these formats in your welcome note to make them attractive.**
   {mention} :  To mention the user
   {title} : To get chat name in message
   {count} : To get group members
@@ -64,6 +58,13 @@ WELCOME_FORMAT = """**Use these fomats in your welcome note to make them attract
   {my_mention} : To mention myself
   {my_username} : To use my username
 """
-# will add more soon
 
-# THANOSPRO
+# Re-export core decorators for easy access in plugins
+from THANOSPRO.clients.decs import rishu_cmd, rishu_handler
+from THANOSPRO.utils.extras import edit_or_reply, delete_rishu
+eor = edit_or_reply
+eod = delete_rishu
+
+# Re-export state variables
+from THANOSPRO.state import StartTime, CMD_HELP, CMD_LIST
+from THANOSPRO.utils.plug import CmdHelp

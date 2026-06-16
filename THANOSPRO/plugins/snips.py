@@ -1,7 +1,7 @@
 from telethon import events
 
-from THANOSPRO.sql import snip_sql as sq
 from . import *
+from THANOSPRO.sql import snip_sql as sq
 
 
 @rishu_cmd(pattern=r'\#(\S+)')

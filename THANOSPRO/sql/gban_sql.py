@@ -1,6 +1,6 @@
-from . import SESSION, BASE
-from sqlalchemy import Column, String
-
+from sqlalchemy import Column, String, select, delete
+from . import BASE
+import THANOSPRO.sql as sql
 
 class GBan(BASE):
     __tablename__ = "gban"
@@ -9,33 +9,47 @@ class GBan(BASE):
     def __init__(self, chat_id):
         self.chat_id = chat_id
 
-
-GBan.__table__.create(checkfirst=True)
-
+# Table creation is handled in init_db()
 
 def is_gbanned(chat_id):
+    if sql.SESSION is None: return None
     try:
-        return SESSION.query(GBan).filter(GBan.chat_id == str(chat_id)).one()
-    except BaseException:
+        stmt = select(GBan).where(GBan.chat_id == str(chat_id))
+        return sql.SESSION.execute(stmt).scalars().first()
+    except Exception:
         return None
     finally:
-        SESSION.close()
-
+        sql.SESSION.remove()
 
 def gbaner(chat_id):
-    adder = GBan(str(chat_id))
-    SESSION.add(adder)
-    SESSION.commit()
-
+    if sql.SESSION is None: return
+    try:
+        if not is_gbanned(chat_id):
+            adder = GBan(str(chat_id))
+            sql.SESSION.add(adder)
+            sql.SESSION.commit()
+    except Exception:
+        sql.SESSION.rollback()
+    finally:
+        sql.SESSION.remove()
 
 def ungbaner(chat_id):
-    rem = SESSION.query(GBan).get(str(chat_id))
-    if rem:
-        SESSION.delete(rem)
-        SESSION.commit()
-
+    if sql.SESSION is None: return
+    try:
+        stmt = delete(GBan).where(GBan.chat_id == str(chat_id))
+        sql.SESSION.execute(stmt)
+        sql.SESSION.commit()
+    except Exception:
+        sql.SESSION.rollback()
+    finally:
+        sql.SESSION.remove()
 
 def all_gbanned():
-    rem = SESSION.query(GBan).all()
-    SESSION.close()
-    return rem
+    if sql.SESSION is None: return []
+    try:
+        stmt = select(GBan)
+        return sql.SESSION.execute(stmt).scalars().all()
+    except Exception:
+        return []
+    finally:
+        sql.SESSION.remove()
